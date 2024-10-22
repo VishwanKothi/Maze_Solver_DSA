@@ -77,3 +77,63 @@ unordered_set<pair<pair<int,int>,pair<int,int>>> dfs_path(unordered_set<pair<pai
     }
     return path;
 }
+struct change{
+    int n;
+    change(int n): n(n) {}
+    bool operator()(pair<int,int> a,pair<int,int> b){
+        int costa = 2*(n-1)-(a.first+a.second);
+        int costb = 2*(n-1)-(b.first+b.second);
+        if(costa<costb){
+            return b<a;
+        }
+        else{
+            return a<b;
+        }
+    }
+};
+unordered_set<pair<pair<int,int>,pair<int,int>>> a_path(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
+    vector<vector<bool>> visited(n,vector<bool>(n,false));
+    vector<vector<pair<int,int>>> parent(n,vector<pair<int,int>>(n,{-1,-1}));
+    change customComparator(n);
+    priority_queue<pair<int,int>,vector<pair<int,int>>, change> st(customComparator);
+    st.push({0,0});
+    visited[0][0]=true;
+    while(!st.empty()){
+        pair<int,int> p = st.top();
+        st.pop();
+        int i = p.first,j = p.second;
+        // cout<<i<<" "<<j<<endl;
+        visited[i][j]=true;
+        if(p==make_pair(n-1,n-1)) break;
+        a_count++;
+        if(i<n-1 && maze.find({{i+1,j},{i+1,j+1}})==maze.end() && !visited[i+1][j]){
+            st.push({i+1,j});
+            parent[i+1][j]={i,j};
+        }
+        if(i>0 && maze.find({{i,j},{i,j+1}})==maze.end() && !visited[i-1][j]){
+            st.push({i-1,j});
+            parent[i-1][j]={i,j};
+        }
+        if(j<n-1 && maze.find({{i,j+1},{i+1,j+1}})==maze.end() && !visited[i][j+1]){
+            st.push({i,j+1});
+            parent[i][j+1]={i,j};
+        }
+        if(j>0 && maze.find({{i,j},{i+1,j}})==maze.end() && !visited[i][j-1]){
+            st.push({i,j-1});
+            parent[i][j-1]={i,j};
+        }
+    }
+    pair<int,int> end = {n-1,n-1};
+    unordered_set<pair<pair<int,int>,pair<int,int>>> path;
+    while(parent[end.first][end.second]!=make_pair(-1,-1)){
+        pair<int,int> a = parent[end.first][end.second];
+        if(end.first==a.first+1||end.second==a.second+1){
+            path.insert({a,end});
+        }
+        else{
+            path.insert({end,a});
+        }
+        end = a;
+    }
+    return path;
+}
