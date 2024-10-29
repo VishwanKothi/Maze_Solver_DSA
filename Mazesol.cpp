@@ -196,26 +196,3 @@ unordered_set<pair<pair<int,int>,pair<int,int>>> bfs_path(unordered_set<pair<pai
     }
     return path;
 }
-void display_maze(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
-    for(int i=0;i<=n;i++){
-        for(int j=0;j<n;j++){
-            cout<<"* ";
-            if(maze.find({{i,j},{i,j+1}})!=maze.end()){
-                cout<<"* ";
-            }
-            else{
-                cout<<"  ";
-            }
-        }
-        cout<<"*"<<endl;
-        for(int j=0;j<=n;j++){
-            if(maze.find({{i,j},{i+1,j}})!=maze.end()){
-                cout<<"*   ";
-            }
-            else{
-                cout<<"    ";
-            }
-        }
-        cout<<endl;
-    }
-}
