@@ -137,3 +137,71 @@ unordered_set<pair<pair<int,int>,pair<int,int>>> a_path(unordered_set<pair<pair<
     }
     return path;
 }
+unordered_set<pair<pair<int,int>,pair<int,int>>> bfs_path(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
+    vector<vector<bool>> visited(n,vector<bool>(n,false));
+    vector<vector<pair<int,int>>> parent(n,vector<pair<int,int>>(n,{-1,-1}));
+    queue<pair<int,int>> q;
+    q.push({0,0});
+    visited[0][0]=true;
+    while(!q.empty()){
+        pair<int,int> p = q.front();
+        q.pop();
+        int i = p.first,j = p.second;
+        // cout<<i<<" "<<j<<endl;
+        visited[i][j] = true;
+        bfs_count++;
+        if(p==make_pair(n-1,n-1)) break;
+        if(i<n-1 && maze.find({{i+1,j},{i+1,j+1}})==maze.end() && !visited[i+1][j]){
+            q.push({i+1,j});
+            parent[i+1][j]={i,j};
+        }
+        if(i>0 && maze.find({{i,j},{i,j+1}})==maze.end() && !visited[i-1][j]){
+            q.push({i-1,j});
+            parent[i-1][j]={i,j};
+        }
+        if(j<n-1 && maze.find({{i,j+1},{i+1,j+1}})==maze.end() && !visited[i][j+1]){
+            q.push({i,j+1});
+            parent[i][j+1]={i,j};
+        }
+        if(j>0 && maze.find({{i,j},{i+1,j}})==maze.end() && !visited[i][j-1]){
+            q.push({i,j-1});
+            parent[i][j-1]={i,j};
+        }
+    }
+    pair<int,int> end = {n-1,n-1};
+    unordered_set<pair<pair<int,int>,pair<int,int>>> path;
+    while(parent[end.first][end.second]!=make_pair(-1,-1)){
+        pair<int,int> a = parent[end.first][end.second];
+        if(a.first==end.first+1 || a.second==end.second+1){
+            path.insert({end,a});
+        }
+        else{
+            path.insert({a,end});
+        }
+        end = a;
+    }
+    return path;
+}
+void display_maze(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
+    for(int i=0;i<=n;i++){
+        for(int j=0;j<n;j++){
+            cout<<"* ";
+            if(maze.find({{i,j},{i,j+1}})!=maze.end()){
+                cout<<"* ";
+            }
+            else{
+                cout<<"  ";
+            }
+        }
+        cout<<"*"<<endl;
+        for(int j=0;j<=n;j++){
+            if(maze.find({{i,j},{i+1,j}})!=maze.end()){
+                cout<<"*   ";
+            }
+            else{
+                cout<<"    ";
+            }
+        }
+        cout<<endl;
+    }
+}
