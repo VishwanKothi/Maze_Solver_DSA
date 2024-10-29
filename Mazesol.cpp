@@ -213,3 +213,5 @@ void display_maze(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
         cout<<endl;
     }
 }
+//displaying the maze
+
