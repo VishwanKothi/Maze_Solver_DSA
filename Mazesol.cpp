@@ -314,17 +314,17 @@ void display(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,unordered_set
         cout<<endl;
     }
 }
-void Sorting_algos(int bfs, int dfs, int dijk_duration, int a_duration) {
-    vector<pair<int, string>> durations = {
-        {dfs_duration,"Depth First Search"},
-        {bfs_duration,"Breadth First Search"},
-        {a_duration,"A* search"},
-        {dijk_duration,"Dijkstra's"}
+void Sorting_algos(int bfs, int dfs, int dijk, int a) {
+    vector<pair<int, string>> algos = {
+        {dfs,"Depth First Search"},
+        {bfs,"Breadth First Search"},
+        {a,"A* search"},
+        {dijk,"Dijkstra's"}
     };
-    sort(durations.begin(), durations.end());
-    for (size_t i = 0; i < durations.size(); ++i) {
-        cout << durations[i].second;
-        if (i < durations.size() - 1) cout << " < ";
+    sort(algos.begin(), algos.end());
+    for (size_t i = 0; i < algos.size(); ++i) {
+        cout << algos[i].second;
+        if (i < algos.size() - 1) cout << " < ";
     }
     cout << endl;
 }
