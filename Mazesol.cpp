@@ -137,7 +137,21 @@ unordered_set<pair<pair<int,int>,pair<int,int>>> DFS_algo(unordered_set<pair<pai
     }
     return path;
 }
-
+/*struct change{
+    int n;
+    change(int n): n(n) {}
+    bool operator()(pair<int,int> a,pair<int,int> b){
+        int costa = sqrt((n-1-a.first)*(n-1-a.first)+(n-1-a.second)*(n-1-a.second));
+        int costb = sqrt((n-1-b.first)*(n-1-b.first)+(n-1-b.second)*(n-1-b.second));
+        if(costa<costb){
+            return b<a;
+        }
+        else{
+            return a<b;
+        }
+    }
+};
+*/
 struct change{
     int n;
     change(int n): n(n) {}
@@ -303,7 +317,7 @@ void print_maze(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
                 cout<<"  ";
             }
         }
-        cout<<"x"<<endl;
+        cout<<"*"<<endl;
         for(int j=0;j<=n;j++){
             if(maze.find({{i,j},{i+1,j}})!=maze.end()){
                 cout<<"*   ";
