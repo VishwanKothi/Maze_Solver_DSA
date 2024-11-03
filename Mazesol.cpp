@@ -33,39 +33,45 @@ namespace std {
     };
 }
 
-int bfs_count=0,dfs_count=0,dijk_count=0,a_count=0;
-int bfs_duration=0,dfs_duration=0,dijk_duration=0,a_duration=0,maze_creation_duration=0;
+int BFS_distance=0,DFS_distance=0,Dijkstra_distance=0,Astar_distance=0;
+int BFS_duration=0,DFS_duration=0,Dijkstra_duration=0,Astar_duration=0,maze_creation_duration=0;
 
-unordered_set<pair<pair<int,int>,pair<int,int>>> bfs_path(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
+unordered_set<pair<pair<int,int>,pair<int,int>>> BFS_algo(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
     vector<vector<bool>> visited(n,vector<bool>(n,false));
     vector<vector<pair<int,int>>> parent(n,vector<pair<int,int>>(n,{-1,-1}));
+    vector<vector<int>> dist(n, vector<int>(n, INT_MAX));
     queue<pair<int,int>> q;
     q.push({0,0});
     visited[0][0]=true;
+    dist[0][0]=0;
     while(!q.empty()){
         pair<int,int> p = q.front();
         q.pop();
         int i = p.first,j = p.second;
         visited[i][j] = true;
-        bfs_count++;
         if(p==make_pair(n-1,n-1)) break;
         if(i<n-1 && maze.find({{i+1,j},{i+1,j+1}})==maze.end() && !visited[i+1][j]){
             q.push({i+1,j});
             parent[i+1][j]={i,j};
+            dist[i+1][j]=dist[i][j]+1;
         }
         if(i>0 && maze.find({{i,j},{i,j+1}})==maze.end() && !visited[i-1][j]){
             q.push({i-1,j});
             parent[i-1][j]={i,j};
+            dist[i-1][j]=dist[i][j]+1;
         }
         if(j<n-1 && maze.find({{i,j+1},{i+1,j+1}})==maze.end() && !visited[i][j+1]){
             q.push({i,j+1});
             parent[i][j+1]={i,j};
+            dist[i][j+1]=dist[i][j]+1;
         }
         if(j>0 && maze.find({{i,j},{i+1,j}})==maze.end() && !visited[i][j-1]){
             q.push({i,j-1});
             parent[i][j-1]={i,j};
+            dist[i][j-1]=dist[i][j]+1;
         }
     }
+    BFS_distance = dist[n-1][n-1];
     pair<int,int> end = {n-1,n-1};
     unordered_set<pair<pair<int,int>,pair<int,int>>> path;
     while(parent[end.first][end.second]!=make_pair(-1,-1)){
@@ -81,36 +87,42 @@ unordered_set<pair<pair<int,int>,pair<int,int>>> bfs_path(unordered_set<pair<pai
     return path;
 }
 
-unordered_set<pair<pair<int,int>,pair<int,int>>> dfs_path(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
+unordered_set<pair<pair<int,int>,pair<int,int>>> DFS_algo(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
     vector<vector<bool>> visited(n,vector<bool>(n,false));
     vector<vector<pair<int,int>>> parent(n,vector<pair<int,int>>(n,{-1,-1}));
+    vector<vector<int>> distance(n, vector<int>(n, INT_MAX));
     vector<pair<int,int>> st;
     st.push_back({0,0});
     visited[0][0]=true;
+    distance[0][0]=0;
     while(!st.empty()){
         pair<int,int> p = st.back();
         st.pop_back();
         int i = p.first,j = p.second;
         visited[i][j]=true;
-        dfs_count++;
         if(p==make_pair(n-1,n-1)) break;
         if(i<n-1 && maze.find({{i+1,j},{i+1,j+1}})==maze.end() && !visited[i+1][j]){
             st.push_back({i+1,j});
             parent[i+1][j]={i,j};
+            distance[i+1][j]=distance[i][j]+1;
         }
         if(i>0 && maze.find({{i,j},{i,j+1}})==maze.end() && !visited[i-1][j]){
             st.push_back({i-1,j});
             parent[i-1][j]={i,j};
+            distance[i-1][j]=distance[i][j]+1;
         }
         if(j<n-1 && maze.find({{i,j+1},{i+1,j+1}})==maze.end() && !visited[i][j+1]){
             st.push_back({i,j+1});
             parent[i][j+1]={i,j};
+            distance[i][j+1]=distance[i][j]+1;
         }
         if(j>0 && maze.find({{i,j},{i+1,j}})==maze.end() && !visited[i][j-1]){
             st.push_back({i,j-1});
             parent[i][j-1]={i,j};
+            distance[i][j-1]=distance[i][j]+1;
         }
     }
+    DFS_distance=distance[n-1][n-1];
     pair<int,int> end = {n-1,n-1};
     unordered_set<pair<pair<int,int>,pair<int,int>>> path;
     while(parent[end.first][end.second]!=make_pair(-1,-1)){
@@ -120,69 +132,6 @@ unordered_set<pair<pair<int,int>,pair<int,int>>> dfs_path(unordered_set<pair<pai
         }
         else{
             path.insert({end,a});
-        }
-        end = a;
-    }
-    return path;
-}
-
-unordered_set<pair<pair<int,int>,pair<int,int>>> dijk_path(unordered_set<pair<pair<int,int>,pair<int,int>>> &maze, int n){
-    vector<vector<int>> dist(n, vector<int>(n, INT_MAX));
-    vector<vector<bool>> visited(n,vector<bool>(n,false));
-    vector<vector<pair<int, int>>> parent(n, vector<pair<int, int>>(n, {-1, -1}));
-    priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<>> pq;
-    dist[0][0] = 0;
-    pq.push({0,{0,0}});
-    visited[0][0]=true;
-    while (!pq.empty()) {
-        auto [d, p] = pq.top();
-        pq.pop();
-        int i = p.first, j = p.second;
-        visited[i][j]=true;
-        if (p == make_pair(n-1,n-1)) break;
-        dijk_count++;
-        if(i<n-1 && maze.find({{i+1,j},{i+1,j+1}})==maze.end() && !visited[i+1][j]){
-            int newDist = d+1; 
-            if (newDist < dist[i+1][j]) {
-                dist[i+1][j] = newDist;
-                parent[i+1][j] = {i,j};
-                pq.push({newDist, {i+1,j}});
-            }
-        }
-        if(i>0 && maze.find({{i,j},{i,j+1}})==maze.end() && !visited[i-1][j]){
-            int newDist = d+1; 
-            if (newDist < dist[i-1][j]) {
-                dist[i-1][j] = newDist;
-                parent[i-1][j] = {i,j};
-                pq.push({newDist, {i-1,j}});
-            }
-        }
-        if(j<n-1 && maze.find({{i,j+1},{i+1,j+1}})==maze.end() && !visited[i][j+1]){
-            int newDist = d+1; 
-            if (newDist < dist[i][j+1]) {
-                dist[i][j+1] = newDist;
-                parent[i][j+1] = {i,j};
-                pq.push({newDist, {i,j+1}});
-            }
-        }
-        if(j>0 && maze.find({{i,j},{i+1,j}})==maze.end() && !visited[i][j-1]){
-            int newDist = d+1; 
-            if (newDist < dist[i][j-1]) {
-                dist[i][j-1] = newDist;
-                parent[i][j-1] = {i,j};
-                pq.push({newDist, {i,j-1}});
-            }
-        }
-    }
-    pair<int,int> end = {n-1,n-1};
-    unordered_set<pair<pair<int,int>,pair<int,int>>> path;
-    while(parent[end.first][end.second]!=make_pair(-1,-1)){
-        pair<int,int> a = parent[end.first][end.second];
-        if(a.first==end.first+1 || a.second==end.second+1){
-            path.insert({end,a});
-        }
-        else{
-            path.insert({a,end});
         }
         end = a;
     }
@@ -193,8 +142,8 @@ struct change{
     int n;
     change(int n): n(n) {}
     bool operator()(pair<int,int> a,pair<int,int> b){
-        int costa = 2*(n-1)-(a.first+a.second);
-        int costb = 2*(n-1)-(b.first+b.second);
+        int costa=2*(n-1)-(a.first+a.second);
+        int costb=2*(n-1)-(b.first+b.second);
         if(costa<costb){
             return b<a;
         }
@@ -204,53 +153,146 @@ struct change{
     }
 };
 
-unordered_set<pair<pair<int,int>,pair<int,int>>> a_path(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
+unordered_set<pair<pair<int,int>,pair<int,int>>> Astar_algo(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
     vector<vector<bool>> visited(n,vector<bool>(n,false));
     vector<vector<pair<int,int>>> parent(n,vector<pair<int,int>>(n,{-1,-1}));
+    vector<vector<int>> distance(n, vector<int>(n, INT_MAX));
     change customComparator(n);
-    priority_queue<pair<int,int>,vector<pair<int,int>>, change> st(customComparator);
-    st.push({0,0});
+    priority_queue<pair<int,int>,vector<pair<int,int>>, change> pq(customComparator);
+    pq.push({0,0});
     visited[0][0]=true;
-    while(!st.empty()){
-        pair<int,int> p = st.top();
-        st.pop();
+    distance[0][0]=0;
+    while(!pq.empty()){
+        pair<int,int> p=pq.top();
+        pq.pop();
         int i = p.first,j = p.second;
         visited[i][j]=true;
         if(p==make_pair(n-1,n-1)) break;
-        a_count++;
+        Astar_distance++;
         if(i<n-1 && maze.find({{i+1,j},{i+1,j+1}})==maze.end() && !visited[i+1][j]){
-            st.push({i+1,j});
+            pq.push({i+1,j});
             parent[i+1][j]={i,j};
+            distance[i+1][j]=distance[i][j]+1;
         }
         if(i>0 && maze.find({{i,j},{i,j+1}})==maze.end() && !visited[i-1][j]){
-            st.push({i-1,j});
+            pq.push({i-1,j});
             parent[i-1][j]={i,j};
+            distance[i-1][j]=distance[i][j]+1;
         }
         if(j<n-1 && maze.find({{i,j+1},{i+1,j+1}})==maze.end() && !visited[i][j+1]){
-            st.push({i,j+1});
+            pq.push({i,j+1});
             parent[i][j+1]={i,j};
+            distance[i][j+1]=distance[i][j]+1;
         }
         if(j>0 && maze.find({{i,j},{i+1,j}})==maze.end() && !visited[i][j-1]){
-            st.push({i,j-1});
+            pq.push({i,j-1});
             parent[i][j-1]={i,j};
+            distance[i][j-1]=distance[i][j]+1;
         }
     }
-    pair<int,int> end = {n-1,n-1};
+    Astar_distance=distance[n-1][n-1];
+    pair<int,int> end={n-1,n-1};
     unordered_set<pair<pair<int,int>,pair<int,int>>> path;
     while(parent[end.first][end.second]!=make_pair(-1,-1)){
-        pair<int,int> a = parent[end.first][end.second];
+        pair<int,int> a=parent[end.first][end.second];
         if(end.first==a.first+1||end.second==a.second+1){
             path.insert({a,end});
         }
         else{
             path.insert({end,a});
         }
+        end=a;
+    }
+    return path;
+}
+
+unordered_map<pair<pair<int, int>, pair<int, int>>, int> generate_weights(int n) {
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<int> weight_dist(1,10);
+    unordered_map<pair<pair<int, int>, pair<int, int>>, int> weights;
+    for (int i=0;i<n;++i){
+        for (int j=0;j<n;++j){
+            if (i<n-1) {
+                weights[{{i,j},{i+1,j}}]=weight_dist(gen);
+            }
+            if (j<n-1){
+                weights[{{i,j},{i,j+1}}]=weight_dist(gen);
+            }
+        }
+    }
+    return weights;
+}
+
+unordered_set<pair<pair<int,int>,pair<int,int>>> Dijkstra_algo(unordered_set<pair<pair<int,int>,pair<int,int>>> &maze, int n){
+    vector<vector<int>> dist(n, vector<int>(n, INT_MAX));
+    auto weights=generate_weights(n);
+    vector<vector<bool>> visited(n,vector<bool>(n,false));
+    vector<vector<pair<int, int>>> parent(n, vector<pair<int, int>>(n, {-1, -1}));
+    priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<>> pq;
+    dist[0][0]=0;
+    pq.push({0,{0,0}});
+    visited[0][0]=true;
+    while (!pq.empty()) {
+        auto [d,p]=pq.top();
+        pq.pop();
+        int i=p.first,j=p.second;
+        visited[i][j]=true;
+        if (p==make_pair(n-1,n-1)) break;
+        if(i<n-1 && maze.find({{i+1,j},{i+1,j+1}})==maze.end() && !visited[i+1][j]){
+            int weight=weights[{{i,j},{i+1,j}}];
+            int new_dist=d+weight; 
+            if (new_dist<dist[i+1][j]) {
+                dist[i+1][j]=new_dist;
+                parent[i+1][j]={i,j};
+                pq.push({new_dist,{i+1,j}});
+            }
+        }
+        if(i>0 && maze.find({{i,j},{i,j+1}})==maze.end() && !visited[i-1][j]){
+            int weight=weights[{{i,j},{i-1,j}}];
+            int new_dist=d+weight; 
+            if (new_dist<dist[i-1][j]) {
+                dist[i-1][j]=new_dist;
+                parent[i-1][j]={i,j};
+                pq.push({new_dist,{i-1,j}});
+            }
+        }
+        if(j<n-1 && maze.find({{i,j+1},{i+1,j+1}})==maze.end() && !visited[i][j+1]){
+            int weight=weights[{{i,j},{i,j+1}}];
+            int new_dist=d+weight; 
+            if (new_dist<dist[i][j+1]) {
+                dist[i][j+1]=new_dist;
+                parent[i][j+1]={i,j};
+                pq.push({new_dist,{i,j+1}});
+            }
+        }
+        if(j>0 && maze.find({{i,j},{i+1,j}})==maze.end() && !visited[i][j-1]){
+            int weight=weights[{{i, j},{i,j-1}}];
+            int new_dist=d+weight; 
+            if (new_dist<dist[i][j-1]) {
+                dist[i][j-1]=new_dist;
+                parent[i][j-1]={i,j};
+                pq.push({new_dist,{i,j-1}});
+            }
+        }
+    }
+    Dijkstra_distance=dist[n-1][n-1];
+    pair<int,int> end={n-1,n-1};
+    unordered_set<pair<pair<int,int>,pair<int,int>>> path;
+    while(parent[end.first][end.second]!=make_pair(-1,-1)){
+        pair<int,int> a=parent[end.first][end.second];
+        if(a.first==end.first+1 || a.second==end.second+1){
+            path.insert({end,a});
+        }
+        else{
+            path.insert({a,end});
+        }
         end = a;
     }
     return path;
 }
 
-void display_maze(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
+void print_maze(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
     for(int i=0;i<=n;i++){
         for(int j=0;j<n;j++){
             cout<<"* ";
@@ -261,7 +303,7 @@ void display_maze(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
                 cout<<"  ";
             }
         }
-        cout<<"*"<<endl;
+        cout<<"x"<<endl;
         for(int j=0;j<=n;j++){
             if(maze.find({{i,j},{i+1,j}})!=maze.end()){
                 cout<<"*   ";
@@ -273,7 +315,7 @@ void display_maze(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,int n){
         cout<<endl;
     }
 }
-void display(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,unordered_set<pair<pair<int,int>,pair<int,int>>> s,int n){
+void print_path(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,unordered_set<pair<pair<int,int>,pair<int,int>>> s,int n){
     for(int i=0;i<=n;i++){
         for(int j=0;j<n;j++){
             cout<<"* ";
@@ -314,17 +356,17 @@ void display(unordered_set<pair<pair<int,int>,pair<int,int>>> maze,unordered_set
         cout<<endl;
     }
 }
-void Sorting_algos(int bfs, int dfs, int dijk, int a) {
+void Sorting_algos(int bfs, int dfs, int dijk, int star) {
     vector<pair<int, string>> algos = {
         {dfs,"Depth First Search"},
         {bfs,"Breadth First Search"},
-        {a,"A* search"},
-        {dijk,"Dijkstra's"}
+        {star,"A* search"},
+        {dijk,"Dijkstra's algorithm"}
     };
     sort(algos.begin(), algos.end());
     for (size_t i = 0; i < algos.size(); ++i) {
         cout << algos[i].second;
-        if (i < algos.size() - 1) cout << " < ";
+        if (i<algos.size()-1) cout << " < ";
     }
     cout << endl;
 }
@@ -357,12 +399,24 @@ int main(){
            parent[i][j] = {i,j};
         }
     }
+    
     unordered_set<pair<pair<int,int>,pair<int,int>>> path;
     for(int i=0;i<edges.size();i++){
         pair<int,int> a=edges[i].first,b=edges[i].second;
         if(find(a,parent)!=find(b,parent)){
             Union(a,b,parent);
             path.insert({a,b});
+        }
+    }
+    int extra_edges=4*n/5;
+    shuffle(edges.begin(), edges.end(), g); 
+
+    for (int i=0; i<edges.size() && extra_edges>0; i++) {
+        pair<int, int> a=edges[i].first;
+        pair<int, int> b=edges[i].second;
+        if (path.find({a, b})==path.end() && path.find({b, a})==path.end()) {
+            path.insert({a, b});
+            extra_edges--;
         }
     }
     unordered_set<pair<pair<int,int>,pair<int,int>>> maze;
@@ -381,59 +435,59 @@ int main(){
     maze_creation_duration = duration.count();
     
     cout<<"\n\nGenerated Maze: \n\n";
-    display_maze(maze,n);
+    print_maze(maze,n);
 
     cout<<"\n\n\nBFS path for the maze:\n\n";
     start = chrono::high_resolution_clock::now();
-    unordered_set<pair<pair<int,int>,pair<int,int>>> bfs_ans = bfs_path(maze,n);
+    unordered_set<pair<pair<int,int>,pair<int,int>>> BFS_path=BFS_algo(maze,n);
     stop = chrono::high_resolution_clock::now();
     duration = chrono::duration_cast<chrono::microseconds>(stop-start);
-    bfs_duration = duration.count();
-    display(maze,bfs_ans,n);
+    BFS_duration = duration.count();
+    print_path(maze,BFS_path,n);
 
     cout<<"\n\n\nDFS path for the maze:\n\n";
     start = chrono::high_resolution_clock::now();
-    unordered_set<pair<pair<int,int>,pair<int,int>>> dfs_ans = dfs_path(maze,n);
+    unordered_set<pair<pair<int,int>,pair<int,int>>> DFS_path=DFS_algo(maze,n);
     stop = chrono::high_resolution_clock::now();
     duration = chrono::duration_cast<chrono::microseconds>(stop-start);
-    dfs_duration = duration.count();
-    display(maze,dfs_ans,n);
-    
-    cout<<"\n\n\nDijkstra path for the maze:\n\n";
-    start = chrono::high_resolution_clock::now();
-    unordered_set<pair<pair<int, int>, pair<int, int>>> dijk_ans= dijk_path(maze, n);
-    stop = chrono::high_resolution_clock::now();
-    duration = chrono::duration_cast<chrono::microseconds>(stop-start);
-    dijk_duration = duration.count();
-    display(maze,dijk_ans,n);
+    DFS_duration = duration.count();
+    print_path(maze,DFS_path,n);
     
     cout<<"\n\n\nA* path for the maze:\n\n";
     start = chrono::high_resolution_clock::now();
-    unordered_set<pair<pair<int,int>,pair<int,int>>> a_ans = a_path(maze,n);
+    unordered_set<pair<pair<int,int>,pair<int,int>>> Astar_path=Astar_algo(maze,n);
     stop = chrono::high_resolution_clock::now();
     duration = chrono::duration_cast<chrono::microseconds>(stop-start);
-    a_duration = duration.count();
-    display(maze,a_ans,n);
+    Astar_duration = duration.count();
+    print_path(maze,Astar_path,n);
+    
+    cout<<"\n\n\nDijkstra path for the maze with weighted edges:\n\n";
+    start = chrono::high_resolution_clock::now();
+    unordered_set<pair<pair<int, int>, pair<int, int>>> Dijkstra_path=Dijkstra_algo(maze, n);
+    stop = chrono::high_resolution_clock::now();
+    duration = chrono::duration_cast<chrono::microseconds>(stop-start);
+    Dijkstra_duration = duration.count();
+    print_path(maze,Dijkstra_path,n);
     
     cout<<endl<<endl;
-    cout<<"The steps taken for solving the maze using Breadth First Search algorithm: "<<bfs_count<<endl;
-    cout<<"The steps taken for solving the maze using Depth First Search algorithm: "<<dfs_count<<endl;
-    cout<<"The steps taken for solving the maze using Dijkstra's algorithm:  "<<dijk_count<<endl;
-    cout<<"The steps taken for solving the maze using A* Search algorithm:  "<<a_count<<endl<<endl;
+    cout<<"The distance taken by Breadth First Search algorithm to solve the maze: "<<BFS_distance<<endl;
+    cout<<"The distance taken by Depth First Search algorithm to solve the maze: "<<DFS_distance<<endl;
+    cout<<"The distance taken by A* Search algorithm to solve the maze: "<<Astar_distance<<endl;
+    cout<<"The distance taken by Dijkstra's algorithm to solve the maze: "<<Dijkstra_distance<<endl<<endl;
     
-    cout<<"The order of the steps taken: ";
-    Sorting_algos(bfs_count, dfs_count, dijk_count, a_count);
+    cout<<"The order of the distance travelled: ";
+    Sorting_algos(BFS_distance, DFS_distance, Dijkstra_distance, Astar_distance);
     cout<<endl;
     
     cout<<endl<<endl;
-    cout<<"The time taken for creation of the Maze: "<<maze_creation_duration<<endl;
-    cout<<"The time taken for solving the maze using Breadth First Search algorithm:: "<<bfs_duration<<endl;
-    cout<<"The time taken for solving the maze using Depth First Search algorithm: "<<dfs_duration<<endl;
-    cout<<"The time taken for solving the maze using  Dijkstra's algorithm:"<<dijk_duration<<endl;
-    cout<<"The time taken for solving the maze using A* Search algorithm: "<<a_duration<<endl<<endl;
+    cout<<"The time taken for creating the Maze: "<<maze_creation_duration<<endl;
+    cout<<"The time taken for solving the maze using Breadth First Search algorithm:: "<<BFS_duration<<endl;
+    cout<<"The time taken for solving the maze using Depth First Search algorithm: "<<DFS_duration<<endl;
+    cout<<"The time taken for solving the maze using A* Search algorithm: "<<Astar_duration<<endl;
+    cout<<"The time taken for solving the maze using  Dijkstra's algorithm: "<<Dijkstra_duration<<endl<<endl;
     
     cout<<"The order of time taken: ";
-    Sorting_algos(bfs_duration, dfs_duration, dijk_duration, a_duration);
+    Sorting_algos(BFS_duration,DFS_duration, Dijkstra_duration, Astar_duration);
     cout<<endl;
     return 0;
 }
